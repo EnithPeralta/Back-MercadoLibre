@@ -1,23 +1,14 @@
-import { User } from "../models/user.models.js";
+import { User } from "../models/user.model.js";
+import bcrypt from 'bcrypt';
 
 
 export const addUser = async (req, res) => {
-    const { cedula, nombre, telefono, direccion, email,password } = req.body;
     try {
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ message: 'User already exists' });
-        }
-        const newUser = new User({
-            cedula,
-            nombre,
-            telefono,
-            direccion,
-            email,
-            password  
-        });
-        await newUser.save();
-        res.status(201).json({ message: 'User added successfully', user: newUser });
+        await User.validate(req.body);
+        const hashedpassword = await bcrypt.hash(req.body.password,10);
+        const newuser = new User({...req.body,password:hashedpassword});
+        const user = await newuser.save();
+        res.json(user);
     } catch (error) {
         console.log("Error add the user", error);
     }
@@ -86,4 +77,26 @@ export const putUser = async (req, res) => {
   }
 };
 
+
+// export const newUser = async (req,res)=>{
+//     const { cedula, nombre, telefono, direccion, email,password } = req.body;
+//     try {
+//         const existingUser = await User.findOne({ email });
+//         if (existingUser) {
+//             return res.status(400).json({ message: 'User already exists' });
+//         }
+//         const newUser = new User({
+//             cedula,
+//             nombre,
+//             telefono,
+//             direccion,
+//             email,
+//             password  
+//         });
+//         await newUser.save();
+//         res.status(201).json({ message: 'User added successfully', user: newUser });
+//     } catch (error) {
+        
+//     }
+// }
 
